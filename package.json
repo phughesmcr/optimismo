@@ -1,0 +1,24 @@
+{
+  "name": "optimismo",
+  "version": "0.1.0",
+  "description": "Analyse the optimism of a string.",
+  "main": "index.js",
+  "dependencies": {
+    "happynodetokenizer": "^0.0.4"
+  },
+  "keywords": [
+    "psychology",
+    "prediction",
+    "optimism",
+    "future",
+    "analysis",
+    "positive"
+  ],
+  "author": "P. Hughes <peter@phugh.es> (http://www.phugh.es)",
+  "license": "CC-BY-NC-SA-3.0",
+  "homepage": "https://github.com/phugh/optimismo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phugh/optimismo"
+  }
+}
