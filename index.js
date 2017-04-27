@@ -100,8 +100,10 @@
       if (!obj.hasOwnProperty(key)) continue
       lex += obj[key][1]
     }
+    // add int
+    lex = lex + int
     // return final lexical value + intercept
-    return lex + int
+    return lex
   }
 
   const optimismo = (str) => {
