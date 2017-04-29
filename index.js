@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v0.1.0
+ * v0.1.2
  *
  * Analyse the optimism of a string.
  *
@@ -51,8 +51,8 @@
     // loop through the lexicon categories
     let match = []
     // loop through words in category
-    let data = lexicon.AFFECT
     let key
+    let data = lexicon.AFFECT
     for (key in data) {
       if (!data.hasOwnProperty(key)) continue
       // if word from input matches word from lexicon ...
@@ -87,10 +87,10 @@
 
   /**
   * @function calcLex
-  * @param  {object} obj      {matches object}
-  * @param  {number} wc       {wordcount}
-  * @param  {number} int      {intercept value}
-  * @return {number} {lexical value}
+  * @param  {object} obj  {matches object}
+  * @param  {number} wc   {wordcount}
+  * @param  {number} int  {intercept value}
+  * @return {number}      {lexical value}
   */
   const calcLex = (obj, int) => {
     // loop through the matches and get the word frequency (counts) and weights
@@ -101,14 +101,19 @@
       lex += obj[key][1]
     }
     // add int
-    lex = lex + int
+    lex += int
     // return final lexical value + intercept
     return lex
   }
 
+  /**
+  * @function optimismo
+  * @param  {string} str {input string}
+  * @return {number}     {optimism value}
+  */
   const optimismo = (str) => {
     // make sure there is input before proceeding
-    if (str == null) return null
+    if (str == null) return 0
     // make sure we're working with a string
     if (typeof str !== 'string') str = str.toString()
     // trim whitespace and convert to lowercase
@@ -116,7 +121,7 @@
     // convert our string to tokens
     const tokens = tokenizer(str)
     // if no tokens return null
-    if (tokens == null) return null
+    if (tokens == null) return 0
     // get 'future' match tokens
     const future = getFuture(tokens)
     // match future tokens against affect lexicon
