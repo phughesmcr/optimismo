@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v0.1.2
+ * v0.1.3
  *
  * Analyse the optimism of a string.
  *
@@ -20,8 +20,8 @@
  * let opt = optimismo(text);
  * console.log(opt)
  *
- * @param {string} str  {input string}
- * @return {number} {optimism value}
+ * @param {string} str  input string
+ * @return {number} optimism value
  */
 
 'use strict'
@@ -43,16 +43,16 @@
 
   /**
   * @function getMatches
-  * @param  {arr} arr       {token array}
-  * @return {object} {object of matches}
+  * @param  {Array} arr token array
+  * @return {Object}  object of matches
   */
   const getMatches = (arr) => {
-    let matches = {}
+    const matches = {}
     // loop through the lexicon categories
-    let match = []
+    const match = []
     // loop through words in category
     let key
-    let data = lexicon.AFFECT
+    const data = lexicon.AFFECT
     for (key in data) {
       if (!data.hasOwnProperty(key)) continue
       // if word from input matches word from lexicon ...
@@ -66,18 +66,21 @@
     return matches
   }
 
+  /**
+  * @function getFuture
+  * @param  {Array} arr token array
+  * @return {Array} array of matched items
+  */
   const getFuture = (arr) => {
     // loop through the lexicon categories
-    let matches = []
+    const matches = []
     // loop through words in category
-    let data = lexicon.FUTURE
+    const data = lexicon.FUTURE
     let key
-    let unique = []
     for (key in data) {
       if (!data.hasOwnProperty(key)) continue
       // if word from input matches word from lexicon add to matches
-      if (arr.indexOf(key) > -1 && unique.indexOf(key) === -1) {
-        unique.push(key)
+      if (arr.indexOf(key) > -1 && matches.indexOf(key) === -1) {
         matches.push(key)
       }
     }
@@ -87,10 +90,10 @@
 
   /**
   * @function calcLex
-  * @param  {object} obj  {matches object}
-  * @param  {number} wc   {wordcount}
-  * @param  {number} int  {intercept value}
-  * @return {number}      {lexical value}
+  * @param  {Object} obj  matches object
+  * @param  {number} wc   word count
+  * @param  {number} int  intercept value
+  * @return {number}  lexical value
   */
   const calcLex = (obj, int) => {
     // loop through the matches and get the word frequency (counts) and weights
@@ -98,18 +101,19 @@
     let lex = 0
     for (key in obj) {
       if (!obj.hasOwnProperty(key)) continue
-      lex += obj[key][1]
+      let weight = Number(obj[key][1])
+      lex += weight
     }
     // add int
-    lex += int
+    lex += Number(int)
     // return final lexical value + intercept
-    return lex
+    return Number(lex)
   }
 
   /**
   * @function optimismo
-  * @param  {string} str {input string}
-  * @return {number}     {optimism value}
+  * @param  {string} str input string
+  * @return {number}  optimism value
   */
   const optimismo = (str) => {
     // make sure there is input before proceeding
