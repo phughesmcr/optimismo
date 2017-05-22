@@ -1,6 +1,6 @@
 {
   "name": "optimismo",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Analyse the optimism of a string.",
   "main": "index.js",
   "dependencies": {

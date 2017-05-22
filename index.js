@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v0.1.4
+ * v0.1.5
  *
  * Analyse the optimism of a string.
  *
@@ -119,6 +119,7 @@
   /**
   * @function optimismo
   * @param  {string} str input string
+  * @param  {number} min  minimum lexical weight threshold for matches (0.91 to -0.98)
   * @return {number}  optimism value
   */
   const optimismo = (str, min) => {
@@ -137,7 +138,7 @@
     // if no minimum set to -999
     if (min == null) min = -999
     // make sure min is a number
-    if (typeof min !== 'string') min = Number(min)
+    if (typeof min !== 'number') min = Number(min)
     // match future tokens against affect lexicon
     const affect = getMatches(future, min)
     // calculate lexical useage
