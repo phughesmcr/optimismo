@@ -6,9 +6,15 @@ Analyse the optimism of a string.
 ```Javascript
 const optimismo = require('optimismo');
 const text = "A big long string of text...";
-let opt = optimismo(text);
-console.log(opt)
+const min = 0.7
+const opt = optimismo(text);
+console.log(opt, min)
 ```
+Scale runs from 1 (Completely pessimistic) to 9 (completely optimistic)
+if there are no matches optimismo will return 0
+
+Lexical weights run from a maximum of 0.91 to a minimum of -0.98
+therefore a "min" value of -0.98 will include all words in the lexicon
 
 ## Output
 ```Markdown

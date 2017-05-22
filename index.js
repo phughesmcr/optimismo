@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v0.1.3
+ * v0.1.4
  *
  * Analyse the optimism of a string.
  *
@@ -17,10 +17,18 @@
  * Usage example:
  * const optimismo = require('optimismo');
  * const text = "A big long string of text...";
- * let opt = optimismo(text);
+ * const min = 0.09
+ * const opt = optimismo(text);
  * console.log(opt)
  *
+ * Scale runs from 1 (Completely pessimistic) to 9 (completely optimistic)
+ * if there are no matches optimismo will return 0
+ *
+ * Lexical weights run from a maximum of 0.91 to a minimum of -0.98
+ * therefore a "min" value of -0.98 will include all words in the lexicon
+ *
  * @param {string} str  input string
+ * @param {number} min  minimum lexical weight threshold for matches (0.91 to -0.98)
  * @return {number} optimism value
  */
 
@@ -29,12 +37,11 @@
   const root = this
   const previous = root.optimismo
 
-  const hasRequire = typeof require !== 'undefined'
-
   let tokenizer = root.tokenizer
   let lexicon = root.lexicon
 
-  if (typeof _ === 'undefined') {
+  if (typeof tokenizer === 'undefined') {
+    const hasRequire = typeof require !== 'undefined'
     if (hasRequire) {
       tokenizer = require('happynodetokenizer')
       lexicon = require('./data/lexicon.json')
@@ -46,7 +53,7 @@
   * @param  {Array} arr token array
   * @return {Object}  object of matches
   */
-  const getMatches = (arr) => {
+  const getMatches = (arr, min) => {
     const matches = {}
     // loop through the lexicon categories
     const match = []
@@ -56,9 +63,9 @@
     for (key in data) {
       if (!data.hasOwnProperty(key)) continue
       // if word from input matches word from lexicon ...
-      if (arr.indexOf(key) > -1) {
-        let item = [key, data[key]]
-        match.push(item)
+      let weight = data[key]
+      if (arr.indexOf(key) > -1 && weight > min) {
+        match.push(weight)
       }
       matches.AFFECT = match
     }
@@ -71,7 +78,7 @@
   * @param  {Array} arr token array
   * @return {Array} array of matched items
   */
-  const getFuture = (arr) => {
+  const getFuture = arr => {
     // loop through the lexicon categories
     const matches = []
     // loop through words in category
@@ -101,13 +108,12 @@
     let lex = 0
     for (key in obj) {
       if (!obj.hasOwnProperty(key)) continue
-      let weight = Number(obj[key][1])
-      lex += weight
+      lex += Number(obj[key])
     }
     // add int
-    lex += Number(int)
+    lex += int
     // return final lexical value + intercept
-    return Number(lex)
+    return lex
   }
 
   /**
@@ -115,9 +121,9 @@
   * @param  {string} str input string
   * @return {number}  optimism value
   */
-  const optimismo = (str) => {
+  const optimismo = (str, min) => {
     // make sure there is input before proceeding
-    if (str == null) return 0
+    if (str == null) return null
     // make sure we're working with a string
     if (typeof str !== 'string') str = str.toString()
     // trim whitespace and convert to lowercase
@@ -128,10 +134,14 @@
     if (tokens == null) return 0
     // get 'future' match tokens
     const future = getFuture(tokens)
+    // if no minimum set to -999
+    if (min == null) min = -999
+    // make sure min is a number
+    if (typeof min !== 'string') min = Number(min)
     // match future tokens against affect lexicon
-    const affect = getMatches(future)
+    const affect = getMatches(future, min)
     // calculate lexical useage
-    const lex = calcLex(affect.AFFECT, 5.037104721).toFixed(2)
+    const lex = calcLex(affect.AFFECT, 5.037104721)
     // return lexical value
     return lex
   }
