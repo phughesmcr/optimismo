@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v0.2.0
+ * v0.2.1
  *
  * Analyse the optimism of a string.
  *
@@ -182,8 +182,6 @@
       }
     }
     opts.threshold = opts.threshold || -999
-    opts.bigrams = opts.bigrams || true
-    opts.trigrams = opts.trigrams || true
     // convert our string to tokens
     let tokens = tokenizer(str)
     // if no tokens return null
