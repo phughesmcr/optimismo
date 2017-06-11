@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v0.1.5
+ * v0.2.0
  *
  * Analyse the optimism of a string.
  *
@@ -17,19 +17,27 @@
  * Usage example:
  * const optimismo = require('optimismo');
  * const text = "A big long string of text...";
- * const min = 0.09
- * const opt = optimismo(text);
- * console.log(opt)
+ * const opts = {
+ *   'threshold': -0.98
+ *   'bigrams': true,
+ *   'trigrams': true
+ * }
+ * const optimism = optimismo(text, opts);
+ * console.log(optimism)
  *
  * Scale runs from 1 (Completely pessimistic) to 9 (completely optimistic)
- * if there are no matches optimismo will return 0
+ * If there are no matches optimismo will return 0
  *
  * Lexical weights run from a maximum of 0.91 to a minimum of -0.98
- * therefore a "min" value of -0.98 will include all words in the lexicon
+ * therefore a "threshold" value of -0.98 (default) will include all words in
+ * the lexicon
+ *
+ * The lexicon contains both bigrams and trigrams. We recommend you set these
+ * to true in the opts object, unless you're analysing very long text.
  *
  * @param {string} str  input string
- * @param {number} min  minimum lexical weight threshold for matches (0.91 to -0.98)
- * @return {number} optimism value
+ * @param {Object} opts options
+ * @return {number} optimism value between 1 and 9
  */
 
 'use strict'
@@ -39,13 +47,49 @@
 
   let tokenizer = root.tokenizer
   let lexicon = root.lexicon
+  let natural = root.natural
 
   if (typeof tokenizer === 'undefined') {
     const hasRequire = typeof require !== 'undefined'
     if (hasRequire) {
       tokenizer = require('happynodetokenizer')
       lexicon = require('./data/lexicon.json')
+      natural = require('natural')
     } else throw new Error('optimismo required happynodetokenizer and ./data/lexicon.json')
+  }
+
+  /**
+  * @function getBigrams
+  * @param  {string} str input string
+  * @return {Array} array of bigram strings
+  */
+  const getBigrams = str => {
+    const NGrams = natural.NGrams
+    const bigrams = NGrams.bigrams(str)
+    const result = []
+    const len = bigrams.length
+    let i = 0
+    for (i; i < len; i++) {
+      result.push(bigrams[i].join(' '))
+    }
+    return result
+  }
+
+  /**
+  * @function getTrigrams
+  * @param  {string} str input string
+  * @return {Array} array of trigram strings
+  */
+  const getTrigrams = str => {
+    const NGrams = natural.NGrams
+    const trigrams = NGrams.trigrams(str)
+    const result = []
+    const len = trigrams.length
+    let i = 0
+    for (i; i < len; i++) {
+      result.push(trigrams[i].join(' '))
+    }
+    return result
   }
 
   /**
@@ -96,51 +140,68 @@
   }
 
   /**
+  * Loop through object and add up lexical weights
   * @function calcLex
   * @param  {Object} obj  matches object
-  * @param  {number} wc   word count
   * @param  {number} int  intercept value
   * @return {number}  lexical value
   */
   const calcLex = (obj, int) => {
-    // loop through the matches and get the word frequency (counts) and weights
-    let key
     let lex = 0
+    // add weights
+    let key
     for (key in obj) {
       if (!obj.hasOwnProperty(key)) continue
-      lex += Number(obj[key])
+      lex += Number(obj[key]) // weight
     }
-    // add int
+    // add intercept value
     lex += int
-    // return final lexical value + intercept
+    // return final lexical value
     return lex
   }
 
   /**
   * @function optimismo
-  * @param  {string} str input string
-  * @param  {number} min  minimum lexical weight threshold for matches (0.91 to -0.98)
+  * @param  {string} str  input string
+  * @param  {Object} opts options object
   * @return {number}  optimism value
   */
-  const optimismo = (str, min) => {
+  const optimismo = (str, opts) => {
     // make sure there is input before proceeding
     if (str == null) return null
     // make sure we're working with a string
     if (typeof str !== 'string') str = str.toString()
     // trim whitespace and convert to lowercase
     str = str.toLowerCase().trim()
+    // option defaults
+    if (opts == null) {
+      opts = {
+        'threshold': -999,    // minimum weight threshold
+        'bigrams': true,      // match bigrams?
+        'trigrams': true      // match trigrams?
+      }
+    }
+    opts.threshold = opts.threshold || -999
+    opts.bigrams = opts.bigrams || true
+    opts.trigrams = opts.trigrams || true
     // convert our string to tokens
-    const tokens = tokenizer(str)
+    let tokens = tokenizer(str)
     // if no tokens return null
     if (tokens == null) return 0
+    // handle bigrams if wanted
+    if (opts.bigrams) {
+      const bigrams = getBigrams(str)
+      tokens = tokens.concat(bigrams)
+    }
+    // handle trigrams if wanted
+    if (opts.trigrams) {
+      const trigrams = getTrigrams(str)
+      tokens = tokens.concat(trigrams)
+    }
     // get 'future' match tokens
     const future = getFuture(tokens)
-    // if no minimum set to -999
-    if (min == null) min = -999
-    // make sure min is a number
-    if (typeof min !== 'number') min = Number(min)
     // match future tokens against affect lexicon
-    const affect = getMatches(future, min)
+    const affect = getMatches(future, opts.threshold)
     // calculate lexical useage
     const lex = calcLex(affect.AFFECT, 5.037104721)
     // return lexical value
