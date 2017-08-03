@@ -7,7 +7,6 @@ Analyse the optimism of a string.
 const optimismo = require('optimismo');
 const text = "A big long string of text...";
 const opts = {
-  'threshold': -0.98
   'bigrams': true,
   'trigrams': true
 }
@@ -16,9 +15,6 @@ console.log(opt, opts)
 ```
 Scale runs from 1 (Completely pessimistic) to 9 (completely optimistic)
 if there are no matches optimismo will return 0
-
-Lexical weights run from a maximum of 0.91 to a minimum of -0.98
-therefore a "threshold" value of -0.98 (default) will include all words in the lexicon
 
 The lexicon contains both bigrams and trigrams. We recommend you set these to true in the opts object, unless you're analysing very long text.
 

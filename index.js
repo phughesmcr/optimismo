@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v0.2.1
+ * v0.3.0
  *
  * Analyse the optimism of a string.
  *
@@ -16,21 +16,16 @@
  *
  * Usage example:
  * const optimismo = require('optimismo');
- * const text = "A big long string of text...";
+ * const str = "A big long string of text...";
  * const opts = {
- *   'threshold': -0.98
  *   'bigrams': true,
  *   'trigrams': true
  * }
- * const optimism = optimismo(text, opts);
+ * const optimism = optimismo(str, opts);
  * console.log(optimism)
  *
  * Scale runs from 1 (Completely pessimistic) to 9 (completely optimistic)
  * If there are no matches optimismo will return 0
- *
- * Lexical weights run from a maximum of 0.91 to a minimum of -0.98
- * therefore a "threshold" value of -0.98 (default) will include all words in
- * the lexicon
  *
  * The lexicon contains both bigrams and trigrams. We recommend you set these
  * to true in the opts object, unless you're analysing very long text.
@@ -45,70 +40,56 @@
   const root = this
   const previous = root.optimismo
 
-  let tokenizer = root.tokenizer
   let lexicon = root.lexicon
   let natural = root.natural
+  let tokenizer = root.tokenizer
 
   if (typeof tokenizer === 'undefined') {
-    const hasRequire = typeof require !== 'undefined'
-    if (hasRequire) {
-      tokenizer = require('happynodetokenizer')
+    if (typeof require !== 'undefined') {
       lexicon = require('./data/lexicon.json')
       natural = require('natural')
+      tokenizer = require('happynodetokenizer')
     } else throw new Error('optimismo required happynodetokenizer and ./data/lexicon.json')
   }
 
   /**
-  * @function getBigrams
-  * @param  {string} str input string
-  * @return {Array} array of bigram strings
+  * Get all the n-grams of a string and return as an array
+  * @function getNGrams
+  * @param {string} str input string
+  * @param {number} n abitrary n-gram number, e.g. 2 = bigrams
+  * @return {Array} array of ngram strings
   */
-  const getBigrams = str => {
-    const NGrams = natural.NGrams
-    const bigrams = NGrams.bigrams(str)
+  const getNGrams = (str, n) => {
+    // default to bi-grams on null n
+    if (n == null) n = 2
+    if (typeof n !== 'number') n = Number(n)
+    const ngrams = natural.NGrams.ngrams(str, n)
+    const len = ngrams.length
     const result = []
-    const len = bigrams.length
     let i = 0
     for (i; i < len; i++) {
-      result.push(bigrams[i].join(' '))
+      result.push(ngrams[i].join(' '))
     }
     return result
   }
 
   /**
-  * @function getTrigrams
-  * @param  {string} str input string
-  * @return {Array} array of trigram strings
-  */
-  const getTrigrams = str => {
-    const NGrams = natural.NGrams
-    const trigrams = NGrams.trigrams(str)
-    const result = []
-    const len = trigrams.length
-    let i = 0
-    for (i; i < len; i++) {
-      result.push(trigrams[i].join(' '))
-    }
-    return result
-  }
-
-  /**
-  * @function getMatches
+  * @function getAffect
   * @param  {Array} arr token array
   * @return {Object}  object of matches
   */
-  const getMatches = (arr, min) => {
+  const getAffect = arr => {
     const matches = {}
     // loop through the lexicon categories
     const match = []
     // loop through words in category
-    let key
+    let word
     const data = lexicon.AFFECT
-    for (key in data) {
-      if (!data.hasOwnProperty(key)) continue
+    for (word in data) {
+      if (!data.hasOwnProperty(word)) continue
       // if word from input matches word from lexicon ...
-      let weight = data[key]
-      if (arr.indexOf(key) > -1 && weight > min) {
+      let weight = data[word]
+      if (arr.indexOf(word) > -1) {
         match.push(weight)
       }
       matches.AFFECT = match
@@ -127,12 +108,12 @@
     const matches = []
     // loop through words in category
     const data = lexicon.FUTURE
-    let key
-    for (key in data) {
-      if (!data.hasOwnProperty(key)) continue
+    let word
+    for (word in data) {
+      if (!data.hasOwnProperty(word)) continue
       // if word from input matches word from lexicon add to matches
-      if (arr.indexOf(key) > -1 && matches.indexOf(key) === -1) {
-        matches.push(key)
+      if (arr.indexOf(word) > -1 && matches.indexOf(word) === -1) {
+        matches.push(word)
       }
     }
     // return matches object
@@ -142,9 +123,9 @@
   /**
   * Loop through object and add up lexical weights
   * @function calcLex
-  * @param  {Object} obj  matches object
-  * @param  {number} int  intercept value
-  * @return {number}  lexical value
+  * @param {Object} obj matches object
+  * @param {number} int intercept value
+  * @return {number} lexical value
   */
   const calcLex = (obj, int) => {
     let lex = 0
@@ -176,30 +157,28 @@
     // option defaults
     if (opts == null) {
       opts = {
-        'threshold': -999,    // minimum weight threshold
         'bigrams': true,      // match bigrams?
         'trigrams': true      // match trigrams?
       }
     }
-    opts.threshold = opts.threshold || -999
     // convert our string to tokens
     let tokens = tokenizer(str)
     // if no tokens return null
-    if (tokens == null) return 0
-    // handle bigrams if wanted
+    if (tokens == null) return null
+    // handle bi-grams if wanted
     if (opts.bigrams) {
-      const bigrams = getBigrams(str)
+      const bigrams = getNGrams(str, 2)
       tokens = tokens.concat(bigrams)
     }
-    // handle trigrams if wanted
+    // handle tri-grams if wanted
     if (opts.trigrams) {
-      const trigrams = getTrigrams(str)
+      const trigrams = getNGrams(str, 3)
       tokens = tokens.concat(trigrams)
     }
     // get 'future' match tokens
     const future = getFuture(tokens)
     // match future tokens against affect lexicon
-    const affect = getMatches(future, opts.threshold)
+    const affect = getAffect(future)
     // calculate lexical useage
     const lex = calcLex(affect.AFFECT, 5.037104721)
     // return lexical value
