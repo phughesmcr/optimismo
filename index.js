@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v0.3.0
+ * v0.4.0
  *
  * Analyse the optimism of a string.
  *
@@ -17,21 +17,13 @@
  * Usage example:
  * const optimismo = require('optimismo');
  * const str = "A big long string of text...";
- * const opts = {
- *   'bigrams': true,
- *   'trigrams': true
- * }
- * const optimism = optimismo(str, opts);
+ * const optimism = optimismo(str);
  * console.log(optimism)
  *
  * Scale runs from 1 (Completely pessimistic) to 9 (completely optimistic)
  * If there are no matches optimismo will return 0
  *
- * The lexicon contains both bigrams and trigrams. We recommend you set these
- * to true in the opts object, unless you're analysing very long text.
- *
  * @param {string} str  input string
- * @param {Object} opts options
  * @return {number} optimism value between 1 and 9
  */
 
@@ -41,34 +33,29 @@
   const previous = root.optimismo
 
   let lexicon = root.lexicon
-  let natural = root.natural
+  let simplengrams = root.simplengrams
   let tokenizer = root.tokenizer
 
   if (typeof tokenizer === 'undefined') {
     if (typeof require !== 'undefined') {
       lexicon = require('./data/lexicon.json')
-      natural = require('natural')
+      simplengrams = require('simplengrams')
       tokenizer = require('happynodetokenizer')
-    } else throw new Error('optimismo required happynodetokenizer and ./data/lexicon.json')
+    } else throw new Error('optimismo required happynodetokenizer, simplengrams and ./data/lexicon.json')
   }
 
   /**
-  * Get all the n-grams of a string and return as an array
-  * @function getNGrams
-  * @param {string} str input string
-  * @param {number} n abitrary n-gram number, e.g. 2 = bigrams
-  * @return {Array} array of ngram strings
-  */
-  const getNGrams = (str, n) => {
-    // default to bi-grams on null n
-    if (n == null) n = 2
-    if (typeof n !== 'number') n = Number(n)
-    const ngrams = natural.NGrams.ngrams(str, n)
-    const len = ngrams.length
-    const result = []
+   * Combines multidimensional array elements into strings
+   * @function arr2string
+   * @param  {Array} arr input array
+   * @return {Array} output array
+   */
+  const arr2string = arr => {
     let i = 0
+    const len = arr.length
+    const result = []
     for (i; i < len; i++) {
-      result.push(ngrams[i].join(' '))
+      result.push(arr[i].join(' '))
     }
     return result
   }
@@ -144,37 +131,29 @@
   /**
   * @function optimismo
   * @param  {string} str  input string
-  * @param  {Object} opts options object
   * @return {number}  optimism value
   */
-  const optimismo = (str, opts) => {
+  const optimismo = str => {
     // make sure there is input before proceeding
     if (str == null) return null
     // make sure we're working with a string
     if (typeof str !== 'string') str = str.toString()
     // trim whitespace and convert to lowercase
     str = str.toLowerCase().trim()
-    // option defaults
-    if (opts == null) {
-      opts = {
-        'bigrams': true,      // match bigrams?
-        'trigrams': true      // match trigrams?
-      }
-    }
     // convert our string to tokens
     let tokens = tokenizer(str)
     // if no tokens return null
     if (tokens == null) return null
-    // handle bi-grams if wanted
-    if (opts.bigrams) {
-      const bigrams = getNGrams(str, 2)
-      tokens = tokens.concat(bigrams)
+    // get n-grams
+    const ngrams = []
+    ngrams.push(arr2string(simplengrams(str, 2)))
+    ngrams.push(arr2string(simplengrams(str, 3)))
+    const nLen = ngrams.length
+    let i = 0
+    for (i; i < nLen; i++) {
+      tokens = tokens.concat(ngrams[i])
     }
-    // handle tri-grams if wanted
-    if (opts.trigrams) {
-      const trigrams = getNGrams(str, 3)
-      tokens = tokens.concat(trigrams)
-    }
+    console.log(tokens)
     // get 'future' match tokens
     const future = getFuture(tokens)
     // match future tokens against affect lexicon
