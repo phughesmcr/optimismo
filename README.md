@@ -13,7 +13,10 @@ Scale runs from 1 (Completely pessimistic) to 9 (completely optimistic)
 if there are no matches optimismo will return 0
 
 
-## Output
+## Default Output
+```javascript
+  4.89
+```
 ```Markdown
 1 = very pessimistic, 5 = neutral, 9 = very optimistic
 ```
@@ -24,7 +27,7 @@ Using the affect/intensity and prospection lexica data from [WWBP](http://www.ww
 
 Used under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/)
 
-# Licence
-(C) 2017 P. Hughes
+# License
+(C) 2017-18 [P. Hughes](https://www.phugh.es). All rights reserved.
 
-[Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/)
+Shared under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/) license.
