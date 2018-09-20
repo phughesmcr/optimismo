@@ -77,10 +77,6 @@ Each item in the lexicon data has an associated weight (number). Use these optio
 
 By default these are set to infinity, ensuring that no words from the lexicon are excluded.
 
-For English, -0.37 (default) will include everything from the lexicon, 0.85 will include nothing.
-
-For Spanish, -0.85 (default) will include everything from the lexicon, 3.32 will include nothing.
-
 ### 'nGrams'
 
 **Array - valid options: [ number, number, ...]**

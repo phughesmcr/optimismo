@@ -1,6 +1,6 @@
 /**
  * optimismo
- * v4.0.0
+ * v4.0.1
  *
  * Analyse the optimism of a string.
  *
