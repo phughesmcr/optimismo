@@ -1,13 +1,17 @@
 {
   "name": "optimismo",
-  "version": "1.0.0-rc.1",
+  "version": "4.0.0",
   "description": "Analyse the optimism of a string.",
   "main": "index.js",
+  "engines": {
+    "node": ">=6.14.4"
+  },
   "dependencies": {
-    "async": "^2.5.0",
-    "happynodetokenizer": "^0.2.0",
-    "lex-helpers": "0.0.3",
-    "simplengrams": "^0.1.0"
+    "async": "^2.6.1",
+    "british_american_translate": "^1.0.2",
+    "happynodetokenizer": "^0.4.1",
+    "lex-helpers": "^0.4.0",
+    "simplengrams": "^0.3.3"
   },
   "keywords": [
     "psychology",
